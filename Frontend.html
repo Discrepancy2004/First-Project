@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup/Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .strength {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .recommendations {
+            color: #e74c3c;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Signup</h2>
+        <form id="signupForm">
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+            <div class="strength" id="strengthIndicator"></div>
+            <ul class="recommendations" id="recommendations"></ul>
+            <button type="submit" id="submitBtn" disabled>Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const strengthIndicator = document.getElementById('strengthIndicator');
+        const recommendationsList = document.getElementById('recommendations');
+        const submitButton = document.getElementById('submitBtn');
+
+        passwordInput.addEventListener('input', async () => {
+            const password = passwordInput.value;
+
+            // Call the backend to check password strength
+            const response = await fetch('/check_strength', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await response.json();
+            strengthIndicator.textContent = `Strength: ${data.strength}`;
+            recommendationsList.innerHTML = '';
+
+            if (data.strength === 'weak') {
+                submitButton.disabled = true;
+                data.recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.textContent = rec;
+                    recommendationsList.appendChild(li);
+                });
+            } else {
+                submitButton.disabled = false;
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = passwordInput.value;
+
+            // Call the backend to encrypt the password
+            const response = await fetch('/encrypt_password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await response.json();
+            alert(`Encrypted Password: ${data.encrypted_password}`);
+        });
+    </script>
+</body>
+</html>
