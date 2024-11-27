@@ -44,6 +44,8 @@ def check_strength():
     password = data.get('password')
 
     # Placeholder strength check
+
+
     is_strong = len(password) >= 8 and any(c.isupper() for c in password) and any(c.isdigit() for c in password)
 
     if is_strong:
